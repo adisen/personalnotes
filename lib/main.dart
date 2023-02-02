@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:personalnotes/firebase_options.dart';
 
 void main() {
+  WidgetsFlutterBinding.ensureInitialized();
   runApp(const MyApp());
 }
 
@@ -51,41 +52,82 @@ class _HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: Text('Register'.toUpperCase())),
-      body: Column(
-        children: [
-          TextField(
-            controller: _email,
-            decoration:
-                const InputDecoration(hintText: 'Enter your email here'),
-            enableSuggestions: true,
-            autocorrect: false,
-            keyboardType: TextInputType.emailAddress,
-          ),
-          TextField(
-            controller: _password,
-            decoration:
-                const InputDecoration(hintText: 'Enter your passwordad here'),
-            obscureText: true,
-            enableSuggestions: false,
-            autocorrect: false,
-          ),
-          TextButton(
-            onPressed: () async {
-              final email = _email.text;
-              final password = _password.text;
+      body: FutureBuilder(
+        future: Firebase.initializeApp(
+            options: DefaultFirebaseOptions.currentPlatform),
+        builder: (context, snapshot) {
+          switch (snapshot.connectionState) {
+            case ConnectionState.done:
+              return Column(
+                children: [
+                  TextField(
+                    controller: _email,
+                    decoration: const InputDecoration(
+                        hintText: 'Enter your email here'),
+                    enableSuggestions: true,
+                    autocorrect: false,
+                    keyboardType: TextInputType.emailAddress,
+                  ),
+                  TextField(
+                    controller: _password,
+                    decoration: const InputDecoration(
+                        hintText: 'Enter your password here'),
+                    obscureText: true,
+                    enableSuggestions: false,
+                    autocorrect: false,
+                  ),
+                  TextButton(
+                    onPressed: () async {
+                      final email = _email.text;
+                      final password = _password.text;
 
-              await Firebase.initializeApp(
-                  options: DefaultFirebaseOptions.currentPlatform);
+                      final userCredential = await FirebaseAuth.instance
+                          .createUserWithEmailAndPassword(
+                              email: email, password: password);
 
-              final userCredential = await FirebaseAuth.instance
-                  .createUserWithEmailAndPassword(
-                      email: email, password: password);
+                      print(userCredential);
+                    },
+                    child: const Text('Register'),
+                  ),
+                ],
+              );
+            default:
+              return const Text('Loading...');
+          }
+          return Column(
+            children: [
+              TextField(
+                controller: _email,
+                decoration:
+                    const InputDecoration(hintText: 'Enter your email here'),
+                enableSuggestions: true,
+                autocorrect: false,
+                keyboardType: TextInputType.emailAddress,
+              ),
+              TextField(
+                controller: _password,
+                decoration:
+                    const InputDecoration(hintText: 'Enter your password here'),
+                obscureText: true,
+                enableSuggestions: false,
+                autocorrect: false,
+              ),
+              TextButton(
+                onPressed: () async {
+                  final email = _email.text;
+                  final password = _password.text;
 
-              print(userCredential);
-            },
-            child: const Text('Register'),
-          ),
-        ],
+                  final userCredential = await FirebaseAuth.instance
+                      .createUserWithEmailAndPassword(
+                          email: email, password: password);
+
+                  print(userCredential);
+                },
+                child: const Text('Register'),
+              ),
+            ],
+          );
+        },
       ),
     );
   }
