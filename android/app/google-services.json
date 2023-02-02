@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "541071911304",
+    "project_id": "ftb-personalnotes",
+    "storage_bucket": "ftb-personalnotes.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:541071911304:android:6af0dc752590b9ca61723d",
+        "android_client_info": {
+          "package_name": "me.favoritetechbro.personalnotes"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "541071911304-dpsgp874q743sq99pm8l95crb37a4lp4.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAUA7mMj4b_jjkl929cRExAQVNWuGxK1kY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "541071911304-dpsgp874q743sq99pm8l95crb37a4lp4.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
