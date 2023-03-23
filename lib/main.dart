@@ -3,6 +3,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:personalnotes/views/login_view.dart';
 import 'package:personalnotes/views/register_view.dart';
+import 'package:personalnotes/views/verify_email_view.dart';
 
 import 'firebase_options.dart';
 
@@ -42,22 +43,41 @@ class HomePage extends StatelessWidget {
       builder: (context, snapshot) {
         switch (snapshot.connectionState) {
           case ConnectionState.done:
-            // final user = FirebaseAuth.instance.currentUser;
-            // final emailVerified = user?.emailVerified ?? false;
-            // print(user);
-
-            // if (emailVerified) {
-            //   // print('YOu are a veified user');
-            //   return const Text('Done');
-            // } else {
-            //   // print('You have not been verified');
-            //   return const VerifyEmailView();
-            // }
-            return const LoginView();
+            final user = FirebaseAuth.instance.currentUser;
+            if (user != null) {
+              if (user.emailVerified) {
+                // return const Text('Email is Verified');
+                return MainUI();
+              } else {
+                return const VerifyEmailView();
+              }
+            } else {
+              return const LoginView();
+            }
+            return const Text('Done');
           default:
             return const CircularProgressIndicator();
         }
       },
+    );
+  }
+}
+
+class MainUI extends StatefulWidget {
+  const MainUI({super.key});
+
+  @override
+  State<MainUI> createState() => _MainUIState();
+}
+
+class _MainUIState extends State<MainUI> {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Main UI'),
+      ),
+      body: const Text('Hello World'),
     );
   }
 }
