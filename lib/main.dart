@@ -4,8 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:personalnotes/views/login_view.dart';
 import 'package:personalnotes/views/register_view.dart';
 import 'package:personalnotes/views/verify_email_view.dart';
-
 import 'firebase_options.dart';
+import 'dart:developer' as devtools show log;
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -47,14 +47,13 @@ class HomePage extends StatelessWidget {
             if (user != null) {
               if (user.emailVerified) {
                 // return const Text('Email is Verified');
-                return MainUI();
+                return const NotesView();
               } else {
                 return const VerifyEmailView();
               }
             } else {
               return const LoginView();
             }
-            return const Text('Done');
           default:
             return const CircularProgressIndicator();
         }
@@ -63,21 +62,71 @@ class HomePage extends StatelessWidget {
   }
 }
 
-class MainUI extends StatefulWidget {
-  const MainUI({super.key});
+enum MenuAction { logout }
+
+class NotesView extends StatefulWidget {
+  const NotesView({super.key});
 
   @override
-  State<MainUI> createState() => _MainUIState();
+  State<NotesView> createState() => _NotesViewState();
 }
 
-class _MainUIState extends State<MainUI> {
+class _NotesViewState extends State<NotesView> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Main UI'),
+        actions: [
+          PopupMenuButton<MenuAction>(
+            onSelected: (action) async {
+              switch (action) {
+                case MenuAction.logout:
+                  // FirebaseAuth.instance.signOut();
+                  final shouldLogout = await showLogoutDialog(context);
+                  if (shouldLogout) {
+                    await FirebaseAuth.instance.signOut();
+                    Navigator.of(context)
+                        .pushNamedAndRemoveUntil("/login", (_) => false);
+                  }
+                  break;
+              }
+            },
+            itemBuilder: (context) => [
+              const PopupMenuItem<MenuAction>(
+                value: MenuAction.logout,
+                child: Text('Logout'),
+              ),
+            ],
+          )
+        ],
       ),
       body: const Text('Hello World'),
     );
   }
+}
+
+Future<bool> showLogoutDialog(BuildContext context) {
+  return showDialog<bool>(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('Logout'),
+          content: const Text('Are you sure you want to logout?'),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop(false);
+              },
+              child: const Text('Cancel'),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop(true);
+              },
+              child: const Text('Logout'),
+            )
+          ],
+        );
+      }).then((value) => value ?? false);
 }
