@@ -5,7 +5,6 @@ import 'package:personalnotes/views/login_view.dart';
 import 'package:personalnotes/views/register_view.dart';
 import 'package:personalnotes/views/verify_email_view.dart';
 import 'firebase_options.dart';
-import 'dart:developer' as devtools show log;
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
