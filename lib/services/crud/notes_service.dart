@@ -2,21 +2,102 @@ import 'package:flutter/material.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart' show join;
 import 'package:path_provider/path_provider.dart';
-
-class DatabaseAlreadyOpenException implements Exception {}
-
-class UnableToGetDocumentsDirectory implements Exception {}
-
-class DatabaseIsNotOpen implements Exception {}
-
-class CouldNotDeleteUser implements Exception {}
-
-class UserAlreadyExists implements Exception {}
-
-class CouldNotFindUser implements Exception {}
+import 'package:personalnotes/services/crud/crud_exceptions.dart';
 
 class NotesService {
   Database? _db;
+
+  Future<DatabaseNote> updateNote(
+      {required String text, required DatabaseNote note}) async {
+    final db = _getDatabaseOrThrow();
+
+    await getNote(id: note.id);
+
+    final updatedCount = await db.update(
+      noteTable,
+      {
+        textColumn: text,
+      },
+      where: '$idColumn = ?',
+      whereArgs: [note.id],
+    );
+
+    if (updatedCount == 0) {
+      throw CouldNotUpdateNote();
+    } else {
+      return await getNote(id: note.id);
+    }
+  }
+
+  Future<List<DatabaseNote>> getAllNotes() async {
+    final db = _getDatabaseOrThrow();
+
+    final results = await db.query(noteTable);
+
+    return results.map((row) => DatabaseNote.fromRow(row)).toList();
+  }
+
+  Future<DatabaseNote> getNote({required int id}) async {
+    final db = _getDatabaseOrThrow();
+
+    final results = await db.query(
+      noteTable,
+      limit: 1,
+      where: '$idColumn = ?',
+      whereArgs: [id],
+    );
+
+    if (results.isEmpty) {
+      throw CouldNotFindNote();
+    } else {
+      return DatabaseNote.fromRow(results.first);
+    }
+  }
+
+  Future<int> deleteAllNotes() async {
+    final db = _getDatabaseOrThrow();
+    final deletedCount = await db.delete(noteTable);
+    return deletedCount;
+  }
+
+  Future<void> deleteNote({required int id}) async {
+    final db = _getDatabaseOrThrow();
+    final deletedCount = await db.delete(
+      noteTable,
+      where: '$idColumn = ?',
+      whereArgs: [id],
+    );
+
+    if (deletedCount == 0) {
+      throw CouldNotDeleteNote();
+    }
+  }
+
+  Future<DatabaseNote> createNote({required DatabaseUser owner}) async {
+    final db = _getDatabaseOrThrow();
+
+    // make sure owner exist in the db witht the correct id
+    final dbUser = await getUser(email: owner.email);
+
+    if (dbUser != owner) {
+      throw CouldNotFindUser();
+    }
+
+    const text = '';
+    // create note
+    final noteId = await db.insert(noteTable, {
+      userIdColumn: owner.id,
+      textColumn: text,
+    });
+
+    final note = DatabaseNote(
+      id: noteId,
+      text: text,
+      userId: owner.id,
+    );
+
+    return note;
+  }
 
   Future<DatabaseUser> getUser({required String email}) async {
     final db = _getDatabaseOrThrow();
